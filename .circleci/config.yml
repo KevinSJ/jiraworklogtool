@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node
+      - image: cimg/node:14.19.3-browsers
     steps:
       - checkout
       - run:
@@ -13,14 +13,14 @@ jobs:
             libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 \
             libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
             libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates \
-            fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
+            fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget || sudo apt-get -f install
       - restore_cache:
           name: Restore Node Package Cache
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - node-v2-{{ .Branch }}-{{ checksum "package-lock.json" }}
-            - node-v2-{{ .Branch }}-
-            - node-v2-
+            - node-v3-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - node-v3-{{ .Branch }}-
+            - node-v3-
       - run:
           name: Install Dependencies
           command: npm i
@@ -32,7 +32,7 @@ jobs:
       - run: npm run lint
       - run:
           name: Run tests with JUnit as reporter
-          command: xvfb-run npm run test -- --ci --reporters=default --reporters=jest-junit
+          command: xvfb-run -a npm run test -- --ci --reporters=default --reporters=jest-junit
           environment:
             JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
       - store_test_results:
